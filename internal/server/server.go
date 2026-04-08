@@ -4,6 +4,7 @@ import (
 	"log"
 	"net/http"
 	"parcel_tracker/internal/handler"
+	"parcel_tracker/internal/service"
 	"time"
 
 	"github.com/go-chi/chi"
@@ -20,7 +21,8 @@ type Server struct {
 func NewServer(logger *log.Logger) *Server {
 	r := chi.NewRouter()
 
-	h := handler.NewHandler(logger)
+	service := service.NewParcelService()
+	h := handler.NewHandler(logger, service)
 
 	srv := &Server{
 		Logger: logger,
@@ -29,6 +31,8 @@ func NewServer(logger *log.Logger) *Server {
 
 	//Routes
 	r.Get("/health", h.GetHealthHandler)
+	r.Post("/parcel", h.PostCreateParcelHabdler)
+	r.Get("/parcels", h.GetParcelsHandler)
 
 	srv.Server = &http.Server{
 		Addr:         ":8080",
