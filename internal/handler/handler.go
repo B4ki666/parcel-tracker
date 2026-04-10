@@ -35,7 +35,7 @@ func (h *Handler) GetHealthHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (h *Handler) PostCreateParcelHabdler(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) PostCreateParcelHandler(w http.ResponseWriter, r *http.Request) {
 	var parcel service.Parcel
 
 	err := json.NewDecoder(r.Body).Decode(&parcel)
@@ -44,24 +44,29 @@ func (h *Handler) PostCreateParcelHabdler(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	if strings.Trim(parcel.Number, " ") == "" {
+	if strings.TrimSpace(parcel.Number) == "" {
 		http.Error(w, "invalid json", http.StatusBadRequest)
+		return
 	}
-	if strings.Trim(parcel.Status, " ") == "" {
+	if strings.TrimSpace(parcel.Status) == "" {
 		parcel.Status = ParcelStatusCreated
 	}
 
 	resParcel := h.ParcelService.CreateParcel(parcel)
 
+	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
-
-	json.NewEncoder(w).Encode(resParcel)
+	if err := json.NewEncoder(w).Encode(resParcel); err != nil {
+		h.Logger.Printf("Error encoding parcel: %v", err)
+	}
 }
 
 func (h *Handler) GetParcelsHandler(w http.ResponseWriter, r *http.Request) {
 	parcels := h.ParcelService.GetAllParcels()
 
-	w.WriteHeader(http.StatusOK)
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(parcels)
+	w.WriteHeader(http.StatusOK)
+	if err := json.NewEncoder(w).Encode(parcels); err != nil {
+		h.Logger.Printf("Error encoding parcel: %v", err)
+	}
 }

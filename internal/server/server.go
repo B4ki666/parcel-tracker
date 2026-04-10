@@ -31,7 +31,7 @@ func NewServer(logger *log.Logger) *Server {
 
 	//Routes
 	r.Get("/health", h.GetHealthHandler)
-	r.Post("/parcel", h.PostCreateParcelHabdler)
+	r.Post("/parcel", h.PostCreateParcelHandler)
 	r.Get("/parcels", h.GetParcelsHandler)
 
 	srv.Server = &http.Server{
