@@ -18,11 +18,10 @@ type Server struct {
 	// parcelService service.ParcelService
 }
 
-func NewServer(logger *log.Logger) *Server {
+func NewServer(logger *log.Logger, parcelService *service.ParcelService) *Server {
 	r := chi.NewRouter()
 
-	service := service.NewParcelService()
-	h := handler.NewHandler(logger, service)
+	h := handler.NewHandler(logger, parcelService)
 
 	srv := &Server{
 		Logger: logger,

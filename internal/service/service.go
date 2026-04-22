@@ -1,37 +1,26 @@
 package service
 
-type Parcel struct {
-	ID     int    `json:"id"`
-	Number string `json:"number"`
-	Status string `json:"status"`
+import (
+	"parcel_tracker/internal/model"
+)
+
+type ParcelRepository interface {
+	Create(parcel model.Parcel) (model.Parcel, error)
+	GetAll() ([]model.Parcel, error)
 }
 
 type ParcelService struct {
-	Parcels   map[int]Parcel
-	idCounter int
+	repo ParcelRepository
 }
 
-func NewParcelService() *ParcelService {
-	return &ParcelService{
-		Parcels: make(map[int]Parcel),
-	}
+func NewParcelService(repo ParcelRepository) *ParcelService {
+	return &ParcelService{repo: repo}
 }
 
-func (p *ParcelService) CreateParcel(parcel Parcel) Parcel {
-	p.idCounter++
-	parcel.ID = p.idCounter
-
-	p.Parcels[parcel.ID] = parcel
-
-	return parcel
+func (s *ParcelService) CreateParcel(parcel model.Parcel) (model.Parcel, error) {
+	return s.repo.Create(parcel)
 }
 
-func (p *ParcelService) GetAllParcels() []Parcel {
-	parcels := make([]Parcel, 0, len(p.Parcels))
-
-	for _, value := range p.Parcels {
-		parcels = append(parcels, value)
-	}
-
-	return parcels
+func (s *ParcelService) GetAllParcels() ([]model.Parcel, error) {
+	return s.repo.GetAll()
 }

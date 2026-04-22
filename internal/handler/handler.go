@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"strings"
 
+	"parcel_tracker/internal/model"
 	"parcel_tracker/internal/service"
 )
 
@@ -16,7 +17,6 @@ const (
 type Handler struct {
 	Logger        *log.Logger
 	ParcelService *service.ParcelService
-	// ParcelService service.ParcelService // позже
 }
 
 func NewHandler(logger *log.Logger, p *service.ParcelService) *Handler {
@@ -36,7 +36,7 @@ func (h *Handler) GetHealthHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) PostCreateParcelHandler(w http.ResponseWriter, r *http.Request) {
-	var parcel service.Parcel
+	var parcel model.Parcel
 
 	err := json.NewDecoder(r.Body).Decode(&parcel)
 	if err != nil {
@@ -52,7 +52,11 @@ func (h *Handler) PostCreateParcelHandler(w http.ResponseWriter, r *http.Request
 		parcel.Status = ParcelStatusCreated
 	}
 
-	resParcel := h.ParcelService.CreateParcel(parcel)
+	resParcel, err := h.ParcelService.CreateParcel(parcel)
+	if err != nil {
+		http.Error(w, "internal error", http.StatusInternalServerError)
+		return
+	}
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
@@ -62,7 +66,12 @@ func (h *Handler) PostCreateParcelHandler(w http.ResponseWriter, r *http.Request
 }
 
 func (h *Handler) GetParcelsHandler(w http.ResponseWriter, r *http.Request) {
-	parcels := h.ParcelService.GetAllParcels()
+	parcels, err := h.ParcelService.GetAllParcels()
+	if err != nil {
+		h.Logger.Println(err)
+		http.Error(w, "internal error", http.StatusInternalServerError)
+		return
+	}
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
