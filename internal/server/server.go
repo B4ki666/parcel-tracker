@@ -32,6 +32,11 @@ func NewServer(logger *log.Logger, parcelService *service.ParcelService) *Server
 	r.Get("/health", h.GetHealthHandler)
 	r.Post("/parcel", h.PostCreateParcelHandler)
 	r.Get("/parcels", h.GetParcelsHandler)
+	r.Post("/client", h.PostCreateClientHandler)
+	r.Get("/clients", h.GetClientsHandler)
+	r.Get("/parcel/{id}", h.GetParcelHandler)
+	r.Delete("/parcel/{id}", h.DeleteParcelHandler)
+	r.Patch("/parcel/{id}", h.PatchParcelHandler)
 
 	srv.Server = &http.Server{
 		Addr:         ":8080",
